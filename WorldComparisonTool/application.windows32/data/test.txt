@@ -1,0 +1,3 @@
+Afghanistan,CO2 emissions (metric tons per capita),1997,0.060797665
+Afghanistan,GDP per capita (current US$),2002, 192.153653
+Denmark,Health expenditure per capita (current US$),2001,2730.152251

@@ -1,0 +1,83 @@
+
+PShape blah;
+
+void setup() {
+  JSONObject json;
+  blah = createShape(GROUP);
+  json = loadJSONObject("countries.geojson.txt");
+  JSONArray coordList = json.getJSONArray("features");
+  Boolean b = true;
+  PShape temp = createShape();
+  for (int i=0; i < coordList.size(); i++) {
+    JSONObject current = coordList.getJSONObject(i);
+    String name = current.getJSONObject("properties").getString("name");
+    JSONObject geometry = current.getJSONObject("geometry");
+    String type = geometry.getString("type");
+    if (type.equals("Polygon")) {
+       JSONArray coords = geometry.getJSONArray("coordinates").getJSONArray(0); 
+       PShape p = createShape();
+       p.beginShape();
+       for (int j=0; j < coords.size(); j++) {
+          JSONArray coord = coords.getJSONArray(j);
+          float x = scale(coord.getFloat(0), -180, 180, 0, 1280 * 1.2) - 200;
+          float y = scale(coord.getFloat(1), 90, -90, 0, 700 * 1.2) + 30;
+          p.vertex(x, y);
+       }
+       p.endShape();
+       //p.setFill(color(random(255),random(255),random(255)));
+       //p.disableStyle();
+       if (b) {
+          temp = p; 
+          b = !b;
+       }
+       blah.addChild(p);
+    }
+    else {
+      
+    }
+    println("Country: " + name);
+    println("type: " + type);
+    println();
+  }
+  println("size of blah: " + blah.getChildCount());
+  temp.setFill(color(random(255),random(255),random(255)));
+  size(1280,700);
+  
+}
+
+void draw() {  
+  shape(blah);
+}
+
+float scale(float x, float xmin, float xmax, float ymin, float ymax) {
+   return ymin + (ymax - ymin) * (x - xmin) / (xmax - xmin); 
+}
+
+
+// source: https://github.com/substack/point-in-polygon/blob/master/index.js
+Boolean contains(PShape p, int x, int y) {
+    
+    Boolean inside = false;
+    for (int i = 0, j = p.getVertexCount() - 1; i < p.getVertexCount(); j = i++) {
+        float xi = p.getVertex(i).x, yi = p.getVertex(i).y;
+        float xj = p.getVertex(j).x, yj = p.getVertex(j).y;
+        
+        Boolean intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    
+    return inside;
+}
+
+void mouseMoved() {
+  for (int i=0; i < blah.getChildCount(); i++) {
+     PShape curr = blah.getChild(i);
+     if (contains(curr, mouseX, mouseY)) {
+        curr.setFill(color(55,140, 220));
+     }
+     else {
+        curr.setFill(color(255,255,255));
+     }  
+  }
+}
